@@ -78,6 +78,7 @@ llm = SagemakerEndpoint(
 )
 
 retriever = AmazonKendraRetriever(index_id=kendraIndex)
+kendra = boto3.client("kendra")
 
 # store document into Kendra
 def store_document(s3_file_name, requestId):
@@ -93,8 +94,7 @@ def store_document(s3_file_name, requestId):
     documents = [
         documentInfo
     ]
-
-    kendra = boto3.client("kendra")
+    
     result = kendra.batch_put_document(
         Documents = documents,
         IndexId = kendraIndex,
