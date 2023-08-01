@@ -153,6 +153,16 @@ export class CdkChatbotLlama2KendraStack extends cdk.Stack {
         statements: [kendraPolicy],
       }),
     );  
+
+    const SageMakerPolicy = new iam.PolicyStatement({  // policy statement for sagemaker
+      actions: ['sagemaker:*'],
+      resources: ['*'],
+    });
+    roleLambda.attachInlinePolicy( // add kendra policy
+      new iam.Policy(this, `lambda-inline-policy-for-sagemaker-in-${projectName}`, {
+        statements: [SageMakerPolicy],
+      }),
+    ); 
    
     const passRoleResourceArn = roleLambda.roleArn;
     const passRolePolicy = new iam.PolicyStatement({  
