@@ -186,7 +186,7 @@ def lambda_handler(event, context):
     body = event['body']
     print('body: ', body)
 
-    global modelId, llm, vectorstore, rag_type
+    global llm, retriever
     
     start = int(time.time())    
 
