@@ -15,11 +15,9 @@ import * as kendra from 'aws-cdk-lib/aws-kendra';
 const debug = false;
 const stage = 'dev';
 const s3_prefix = 'docs';
-const bedrock_region = "us-west-2";
-const endpoint_url = "https://prod.us-west-2.frontend.bedrock.aws.dev";
-const model_id = "amazon.titan-tg1-large"; // amazon.titan-e1t-medium, anthropic.claude-v1
 const projectName = "llama2-with-kendra";
 const bucketName = `storage-for-${projectName}`;
+const endpoint = 'jumpstart-dft-meta-textgeneration-llama-2-7b-f';
 
 export class CdkChatbotLlama2KendraStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -144,22 +142,12 @@ export class CdkChatbotLlama2KendraStack extends cdk.Stack {
       roleName: `role-lambda-chat-for-${projectName}`,
       assumedBy: new iam.CompositePrincipal(
         new iam.ServicePrincipal("lambda.amazonaws.com"),
-        new iam.ServicePrincipal("bedrock.amazonaws.com"),
         new iam.ServicePrincipal("kendra.amazonaws.com")
       )
     });
     roleLambda.addManagedPolicy({
       managedPolicyArn: 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole',
     });
-    const BedrockPolicy = new iam.PolicyStatement({ 
-      resources: ['*'],
-      actions: ['bedrock:*'],
-    });        
-    roleLambda.attachInlinePolicy( // add bedrock policy
-      new iam.Policy(this, `lambda-inline-policy-for-bedrock-in-${projectName}`, {
-        statements: [BedrockPolicy],
-      }),
-    );         
     roleLambda.attachInlinePolicy( // add kendra policy
       new iam.Policy(this, `lambda-inline-policy-for-kendra-in-${projectName}`, {
         statements: [kendraPolicy],
@@ -191,15 +179,13 @@ export class CdkChatbotLlama2KendraStack extends cdk.Stack {
       memorySize: 4096,
       role: roleLambda,
       environment: {
-        bedrock_region: bedrock_region,
-        endpoint_url: endpoint_url,
-        model_id: model_id,
         s3_bucket: s3Bucket.bucketName,
         s3_prefix: s3_prefix,
         callLogTableName: callLogTableName,
         configTableName: configTableName,
         kendraIndex: cfnIndex.attrId,
-        roleArn: roleLambda.roleArn
+        roleArn: roleLambda.roleArn,
+        endpoint: endpoint
       }
     });     
     lambdaChatApi.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));  
