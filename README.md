@@ -253,13 +253,37 @@ else:
     return result['result']
 ```
 
-## 실습하기
+### AWS CDK로 인프라 구현하기
+
+[CDK 구현 코드](./cdk-chatbot-llama2-kendra/README.md)에서는 Typescript로 인프라를 정의하는 방법에 대해 상세히 설명하고 있습니다.
+
+## 직접 실습 해보기
+
+### 사전 준비 사항
+
+이 솔루션을 사용하기 위해서는 사전에 아래와 같은 준비가 되어야 합니다.
+
+- [AWS Account 생성](https://repost.aws/ko/knowledge-center/create-and-activate-aws-account)
+
+
 
 ### CDK를 이용한 인프라 설치
-[인프라 설치](./deployment.md)에 따라 CDK로 인프라 설치를 진행합니다. [CDK 구현 코드](./cdk-chatbot-with-kendra/README.md)에서는 Typescript로 인프라를 정의하는 방법에 대해 상세히 설명하고 있습니다.
+[인프라 설치](./deployment.md)에 따라 CDK로 인프라 설치를 진행합니다. 
 
 
-## 실행결과
+### 실행결과
+
+채팅창에 "Tell me how to use ChatGPT in AWS."라고 입력합니다. 대규모 언어 모델은 가장 근사한 답을 찾아서 전달하므로 전형적인 환각(hallucination) 응답을 얻었습니다.
+
+[그림]
+
+[gen-ai-aws.pdf](./gen-ai-aws.pdf)을 다운로드 한 후에 채팅창 아래의 파일 아이콘을 선택하여 업로드합니다. 업로드가 끝나면 아래와 같이 "gen-ai-aws.pdf"을 요약하여 보여줍니다.
+
+[그림]
+
+"gen-ai-aws.pdf"는 AWS의 Generative AI에 대한 정보를 가지고 있으므로, 동일한 질문을 했을때에 아래와 같이 이전과 다른 정확한 답변을 얻을 수 있습니다.
+
+[그림]
 
 파일을 올리면 먼저 파일을 S3에 올리고, 이후로 kendra에 등록합니다. 업로드 한 파일의 내용을 확인하기 위하여 아래와 같이 요약(Summeraztion)을 수행합니다.
 
@@ -268,6 +292,19 @@ else:
 이후 아래와 같이 문서 내용에 대해 질문을 하면 답변을 얻을 수 있습니다.
 
 ![image](https://github.com/kyopark2014/question-answering-chatbot-with-kendra/assets/52392004/877d04a7-8190-43b5-a9fc-eab9e00ab990)
+
+### 리소스 정리하기
+
+더이상 인프라를 사용하지 않는 경우에 아래처럼 모든 리소스를 삭제할 수 있습니다. [Cloud9 console](https://ap-northeast-2.console.aws.amazon.com/cloud9control/home?region=ap-northeast-2#/)에 접속하여 아래와 같이 삭제를 합니다.
+
+```java
+cdk destroy
+```
+
+
+## 결론
+
+SageMaker JumpStart를 이용하여 대규모 언어 모델(LLM)인 LLama 2를 쉽게 배포하였고, Kendra를 이용하여 질문과 답변(Question/Answering)을 수행하는 chatbot의 기능을 향상시켰습니다. Amazon SageMaker JumpStart에서는 여러 종류의 대용량 언어 모델에서 한개를 선택하여 사용할 수 있습니다. 여기서는 Llama 2을 이용하여 RAG 동작을 구현하였고, 대용량 언어 모델의 환각(hallucination) 문제를 해결할 수 있었습니다. 또한 Chatbot 어플리케이션 개발을 위해 LangChain을 활용하였고, IaC(Infrastructure as Code)로 AWS CDK를 이용하였습니다. 대용량 언어 모델은 향후 다양한 어플리케이션에서 효과적으로 활용될것으로 기대됩니다. SageMaker JumpStart을 이용하여 대용량 언어 모델을 개발하면 기존 AWS 인프라와 손쉽게 연동하고 다양한 어플리케이션을 효과적으로 개발할 수 있습니다.
 
 
 #### Chatbot 동작 시험시 주의할점
