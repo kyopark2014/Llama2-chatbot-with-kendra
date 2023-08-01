@@ -77,6 +77,8 @@ llm = SagemakerEndpoint(
     content_handler = content_handler
 )
 
+retriever = AmazonKendraRetriever(index_id=kendraIndex)
+
 # store document into Kendra
 def store_document(s3_file_name, requestId):
     documentInfo = {
@@ -136,9 +138,7 @@ def load_document(file_type, s3_file_name):
     ]
     return docs
               
-def get_answer_using_template(query):
-    print('kendraIndex: ', kendraIndex)
-    retriever = AmazonKendraRetriever(index_id=kendraIndex)
+def get_answer_using_template(query):    
     relevant_documents = retriever.get_relevant_documents(query)
     print('length of relevant_documents: ', len(relevant_documents))
 
