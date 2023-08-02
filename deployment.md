@@ -1,4 +1,15 @@
-# CDK를 이용한 인프라 설치하기
+# 설치하기
+
+
+## LLM Endpoint 설치하기
+
+
+SageMaker JumpStart에서 "Llama-2-7b-chat"를 고른후에 Deploy를 선택합니다. 설치가 되면 "jumpstart-dft-meta-textgeneration-llama-2-7b-f"와 같이 Endpoint가 생성됩니다.
+
+![noname](https://github.com/kyopark2014/Llama2-chatbot-with-vector-store/assets/52392004/f801809f-9ea2-46b2-932a-e0586283c814)
+
+
+## CDK를 이용한 인프라 설치하기
 
 여기서는 [Cloud9](https://aws.amazon.com/ko/cloud9/)에서 [AWS CDK](https://aws.amazon.com/ko/cdk/)를 이용하여 인프라를 설치합니다. 현재 Seoul Region에 Kendra 미지원이라서 가장 가까운 Tokyo Region에서 실습을 수행합니다.
 
