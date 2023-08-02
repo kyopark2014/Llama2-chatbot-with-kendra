@@ -15,7 +15,7 @@ SageMaker JumpStart에서 "Llama-2-7b-chat"를 고른후에 Deploy를 선택합�
 
 Kendra를 설치하기 위해서는 [IAM Identity Center - Tokyo](https://ap-northeast-1.console.aws.amazon.com/singlesignon/home?region=ap-northeast-1#!/instances/users)에서 아래와 같이 최소 하나의 계정이 생성되어 있어야 합니다. 만약 계정이 생성되어 있지 않다면 신규로 생성후 다음 단계를 진행하시기 바랍니다.
 
-![image](https://github.com/kyopark2014/Llama2-chatbot-with-kendra/assets/52392004/8d96153c-98b7-4522-bc31-254d246bc488)
+![image](https://github.com/kyopark2014/Llama2-chatbot-with-kendra/assets/52392004/56f469ea-694a-4b6e-ae1b-d7e336c4e33f)
 
 
 1) [Cloud9 Console](https://ap-northeast-1.console.aws.amazon.com/cloud9control/home?region=ap-northeast-1#/create)에 접속하여 [Create environment]-[Name]에서 “chatbot”으로 이름을 입력하고, EC2 instance는 “m5.large”를 선택합니다. 나머지는 기본값을 유지하고, 하단으로 스크롤하여 [Create]를 선택합니다.
