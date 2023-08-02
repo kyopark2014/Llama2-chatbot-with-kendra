@@ -1,5 +1,6 @@
 # 설치하기
 
+현재(2023년 7월 기준) [Llama 2를 SageMaker JumpStart로 설치](https://aws.amazon.com/ko/blogs/machine-learning/llama-2-foundation-models-from-meta-are-now-available-in-amazon-sagemaker-jumpstart/)은 일부 Region에서만 사용이 가능합니다. 여기서는 us-east-1 에서 실습을 수행합니다.
 
 ## LLM Endpoint 설치하기
 
@@ -11,7 +12,7 @@ SageMaker JumpStart에서 "Llama-2-7b-chat"를 고른후에 Deploy를 선택합�
 
 ## CDK를 이용한 인프라 설치하기
 
-여기서는 [Cloud9](https://aws.amazon.com/ko/cloud9/)에서 [AWS CDK](https://aws.amazon.com/ko/cdk/)를 이용하여 인프라를 설치합니다. 현재 Seoul Region에 Kendra 미지원이라서 가장 가까운 Tokyo Region에서 실습을 수행합니다.
+여기서는 [Cloud9](https://aws.amazon.com/ko/cloud9/)에서 [AWS CDK](https://aws.amazon.com/ko/cdk/)를 이용하여 인프라를 설치합니다. 
 
 Kendra를 설치하기 위해서는 [IAM Identity Center - Tokyo](https://ap-northeast-1.console.aws.amazon.com/singlesignon/home?region=ap-northeast-1#!/instances/users)에서 아래와 같이 최소 하나의 계정이 생성되어 있어야 합니다. 만약 계정이 생성되어 있지 않다면 신규로 생성후 다음 단계를 진행하시기 바랍니다.
 
