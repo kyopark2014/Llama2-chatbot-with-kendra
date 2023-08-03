@@ -266,22 +266,6 @@ def lambda_handler(event, context):
         elapsed_time = int(time.time()) - start
         print("total run time(sec): ", elapsed_time)
 
-        item = {
-            'user-id': {'S':userId},
-            'request-id': {'S':requestId},
-            'type': {'S':type},
-            'body': {'S':body},
-            'msg': {'S':msg}
-        }
-
-        client = boto3.client('dynamodb')
-        try:
-            resp =  client.put_item(TableName=callLogTableName, Item=item)
-        except: 
-            raise Exception ("Not able to write into dynamodb")
-        
-        print('resp, ', resp)
-
     return {
         'statusCode': 200,
         'msg': msg,
