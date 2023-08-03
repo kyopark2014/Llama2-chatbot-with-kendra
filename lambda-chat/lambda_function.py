@@ -80,8 +80,7 @@ retriever = AmazonKendraRetriever(
 #relevant_documents = retriever.get_relevant_documents("what is the generative ai?")
 #print('length of relevant_documents: ', len(relevant_documents))
 
-
-def query(query):
+def kendraQuery(query):
     response = kendra.query(QueryText=query, IndexId=kendraIndex)
     print('response: ', response)
     for query_result in response['ResultItems']:
@@ -99,9 +98,6 @@ def query(query):
             else:
                 answer_text = answer['Text'][begin:end]
             return answer_text
-
-msg = query("what is the generative ai?")
-print('msg: ', msg)
 
 # store document into Kendra
 def store_document(s3_file_name, requestId):
@@ -162,8 +158,21 @@ def load_document(file_type, s3_file_name):
     return docs
               
 def get_answer_using_template(query):    
-    relevant_documents = retriever.get_relevant_documents(query)
+    
+
+    response = kendra.retrieve(
+        IndexId=kendraIndex,
+        QueryText=query.strip(),
+        #PageSize=top_k,
+        #AttributeFilter=attribute_filter,
+    )
+    print('response: ', response)
+
+    #relevant_documents = retriever.get_relevant_documents(query)
+    relevant_documents = kendraQuery(query)
     print('length of relevant_documents: ', len(relevant_documents))
+    print('relevant_documents: ', relevant_documents)    
+    
 
     if(len(relevant_documents)==0):
         return llm(query)
