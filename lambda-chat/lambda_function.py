@@ -141,6 +141,7 @@ def load_document(file_type, s3_file_name):
     return docs
               
 def get_answer_using_template(query):    
+    retriever = AmazonKendraRetriever(index_id=kendraIndex)
     relevant_documents = retriever.get_relevant_documents(query)
     print('length of relevant_documents: ', len(relevant_documents))
 
