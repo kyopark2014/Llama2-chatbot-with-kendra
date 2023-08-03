@@ -80,24 +80,34 @@ retriever = AmazonKendraRetriever(
 #relevant_documents = retriever.get_relevant_documents("what is the generative ai?")
 #print('length of relevant_documents: ', len(relevant_documents))
 
+
+def combined_text(title: str, excerpt: str) -> str:
+    if not title or not excerpt:
+        return ""
+    return f"Document Title: {title} \nDocument Excerpt: \n{excerpt}\n"
+
+def to_doc(doc) -> Document:
+    title = doc.DocumentTitle if doc.DocumentTitle else ""
+    source = doc.DocumentURI
+    excerpt = doc.DocumentExcerpt.Text
+    print('excerpt: ', excerpt)
+    page_content = combined_text(title, excerpt)    
+    metadata = {"source": source, "title": title}
+    return Document(page_content=page_content, metadata=metadata)
+
 def kendraQuery(query):
-    response = kendra.retrieve(QueryText=query, IndexId=kendraIndex)
+    response = kendra.query(QueryText=query, IndexId=kendraIndex)
     print('response: ', response)
+
+    docs = []
     for query_result in response['ResultItems']:
-        begin = 0
-        end = 0
-        if query_result['Type'] == 'ANSWER':
-            answer = query_result['AdditionalAttributes'][0]['Value']['TextWithHighlightsValue']
-            highlight = answer['Highlights']
-            for obj in highlight:
-                if obj['TopAnswer'] is True:
-                    begin = obj['BeginOffset']
-                    end = obj['EndOffset']
-            if end == 0:
-                answer_text = answer['Text']
-            else:
-                answer_text = answer['Text'][begin:end]
-            return answer_text
+        doc = to_doc(query_result)
+        print('doc: ', doc)
+
+        docs.append(doc)
+
+    return docs
+                
 
 # store document into Kendra
 def store_document(s3_file_name, requestId):
