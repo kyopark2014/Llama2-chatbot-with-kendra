@@ -86,10 +86,10 @@ def combined_text(title: str, excerpt: str) -> str:
         return ""
     return f"Document Title: {title} \nDocument Excerpt: \n{excerpt}\n"
 
-def to_doc(doc) -> Document:
-    title = doc.DocumentTitle if doc.DocumentTitle else ""
-    source = doc.DocumentURI
-    excerpt = doc.DocumentExcerpt.Text
+def to_doc(doc) -> Document:    
+    title = doc['DocumentTitle'] if doc.DocumentTitle else ""
+    source = doc['DocumentURI']
+    excerpt = doc['DocumentExcerpt']['Text']
     print('excerpt: ', excerpt)
     page_content = combined_text(title, excerpt)    
     metadata = {"source": source, "title": title}
@@ -97,10 +97,10 @@ def to_doc(doc) -> Document:
 
 def kendraQuery(query):
     response = kendra.query(QueryText=query, IndexId=kendraIndex)
-    print('response: ', response)
-
+    
     docs = []
     for query_result in response['ResultItems']:
+        print('query_result: ', query_result)
         doc = to_doc(query_result)
         print('doc: ', doc)
 
@@ -168,13 +168,11 @@ def load_document(file_type, s3_file_name):
     return docs
               
 def get_answer_using_template(query):    
-
     #relevant_documents = retriever.get_relevant_documents(query)
     relevant_documents = kendraQuery(query)
     print('length of relevant_documents: ', len(relevant_documents))
     print('relevant_documents: ', relevant_documents)    
     
-
     if(len(relevant_documents)==0):
         return llm(query)
     else:
