@@ -77,8 +77,12 @@ llm = SagemakerEndpoint(
     content_handler = content_handler
 )
 
-retriever = AmazonKendraRetriever(index_id=kendraIndex)
 kendra = boto3.client("kendra")
+retriever = AmazonKendraRetriever(
+    index_id=kendraIndex,
+    region_name=aws_region,
+    client=kendra
+)
 
 # store document into Kendra
 def store_document(s3_file_name, requestId):
