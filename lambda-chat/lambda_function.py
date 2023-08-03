@@ -71,11 +71,11 @@ llm = SagemakerEndpoint(
     content_handler = content_handler
 )
 
-kendra = boto3.client("kendra")
+kendra = boto3.client("kendra", region_name=aws_region)
 retriever = AmazonKendraRetriever(
     index_id=kendraIndex,
     region_name=aws_region,
-    #client=kendra
+    client=kendra
 )
 relevant_documents = retriever.get_relevant_documents("what is the generative ai?")
 print('length of relevant_documents: ', len(relevant_documents))
