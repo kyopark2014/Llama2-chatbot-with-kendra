@@ -100,7 +100,8 @@ def query(query):
                 answer_text = answer['Text'][begin:end]
             return answer_text
 
-query("what is the generative ai?")
+msg = query("what is the generative ai?")
+print('msg: ', msg)
 
 # store document into Kendra
 def store_document(s3_file_name, requestId):
