@@ -71,7 +71,12 @@ llm = SagemakerEndpoint(
     content_handler = content_handler
 )
 
-retriever = AmazonKendraRetriever(index_id=kendraIndex)
+kendra = boto3.client("kendra")
+retriever = AmazonKendraRetriever(
+    index_id=kendraIndex,
+    region_name=aws_region,
+    client=kendra
+)
 
 # store document into Kendra
 def store_document(s3_file_name, requestId):
@@ -87,8 +92,7 @@ def store_document(s3_file_name, requestId):
     documents = [
         documentInfo
     ]
-    
-    kendra = boto3.client("kendra")
+        
     result = kendra.batch_put_document(
         Documents = documents,
         IndexId = kendraIndex,
@@ -142,7 +146,7 @@ def get_answer_using_template(query):
         print(f'{len(relevant_documents)} documents are fetched which are relevant to the query.')
         print('----')
         for i, rel_doc in enumerate(relevant_documents):
-            print(f'## Document {i+1}: {rel_doc.page_content}.......')
+            print_ww(f'## Document {i+1}: {rel_doc.page_content}.......')
             print('---')
 
         prompt_template = """Human: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
