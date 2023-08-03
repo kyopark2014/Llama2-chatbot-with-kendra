@@ -31,6 +31,7 @@ kendraIndex = os.environ.get('kendraIndex')
 roleArn = os.environ.get('roleArn')
 modelId = os.environ.get('model_id')
 print('model_id: ', modelId)
+endpoint_name = os.environ.get('endpoint')
 
 class ContentHandler(LLMContentHandler):
     content_type = "application/json"
@@ -230,37 +231,8 @@ def lambda_handler(event, context):
     msg = ""
     if type == 'text' and body[:11] == 'list models':
         msg = f"The list of models: \n"
-        lists = modelInfo['modelSummaries']
-        
-        for model in lists:
-            msg += f"{model['modelId']}\n"
-        
-        msg += f"current model: {modelId}"
         print('model lists: ', msg)
     
-    elif type == 'text' and body[:20] == 'change the model to ':
-        new_model = body.rsplit('to ', 1)[-1]
-        print(f"new model: {new_model}, current model: {modelId}")
-
-        if modelId == new_model:
-            msg = "No change! The new model is the same as the current model."
-        else:        
-            lists = modelInfo['modelSummaries']
-            isChanged = False
-            for model in lists:
-                if model['modelId'] == new_model:
-                    print(f"new modelId: {new_model}")
-                    modelId = new_model
-                    llm = Bedrock(model_id=modelId, client=boto3_bedrock)
-                    isChanged = True
-                    save_configuration(userId, modelId)            
-
-            if isChanged:
-                msg = f"The model is changed to {modelId}"
-            else:
-                msg = f"{modelId} is not in lists."
-        print('msg: ', msg)
-
     else:             
         if type == 'text':
             text = body
