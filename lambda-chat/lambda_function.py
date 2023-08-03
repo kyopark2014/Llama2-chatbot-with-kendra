@@ -83,12 +83,13 @@ def combined_text(title: str, excerpt: str) -> str:
         return ""
     return f"Document Title: {title} \nDocument Excerpt: \n{excerpt}\n"
 
-def to_doc(doc) -> Document:    
-    print('DocumentTitle: ', doc['DocumentTitle'])
+def to_doc(body) -> Document:    
+    print('body: ', body)
+    print('DocumentTitle: ', body['DocumentTitle'])
 
-    title = doc['DocumentTitle']['Text'] if doc['DocumentTitle']['Text'] else ""
-    source = doc['DocumentURI']
-    excerpt = doc['DocumentExcerpt']['Text']
+    title = body['DocumentTitle']['Text'] if body['DocumentTitle']['Text'] else ""
+    source = body['DocumentURI']
+    excerpt = body['DocumentExcerpt']['Text']
     print('excerpt: ', excerpt)
     page_content = combined_text(title, excerpt)    
     metadata = {"source": source, "title": title}
