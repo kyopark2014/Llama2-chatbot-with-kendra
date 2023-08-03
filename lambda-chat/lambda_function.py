@@ -77,8 +77,30 @@ retriever = AmazonKendraRetriever(
     region_name=aws_region,
     client=kendra
 )
-relevant_documents = retriever.get_relevant_documents("what is the generative ai?")
-print('length of relevant_documents: ', len(relevant_documents))
+#relevant_documents = retriever.get_relevant_documents("what is the generative ai?")
+#print('length of relevant_documents: ', len(relevant_documents))
+
+
+def query(query):
+    response = kendra.query(QueryText=query, IndexId=kendraIndex)
+    print('response: ', response)
+    for query_result in response['ResultItems']:
+        begin = 0
+        end = 0
+        if query_result['Type'] == 'ANSWER':
+            answer = query_result['AdditionalAttributes'][0]['Value']['TextWithHighlightsValue']
+            highlight = answer['Highlights']
+            for obj in highlight:
+                if obj['TopAnswer'] is True:
+                    begin = obj['BeginOffset']
+                    end = obj['EndOffset']
+            if end == 0:
+                answer_text = answer['Text']
+            else:
+                answer_text = answer['Text'][begin:end]
+            return answer_text
+
+query("what is the generative ai?")
 
 # store document into Kendra
 def store_document(s3_file_name, requestId):
