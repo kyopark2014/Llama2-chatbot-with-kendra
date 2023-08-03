@@ -87,7 +87,7 @@ def combined_text(title: str, excerpt: str) -> str:
     return f"Document Title: {title} \nDocument Excerpt: \n{excerpt}\n"
 
 def to_doc(doc) -> Document:    
-    title = doc['DocumentTitle'] if doc.DocumentTitle else ""
+    title = doc['DocumentTitle']['Text'] if doc['DocumentTitle']['Text'] else ""
     source = doc['DocumentURI']
     excerpt = doc['DocumentExcerpt']['Text']
     print('excerpt: ', excerpt)
