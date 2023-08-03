@@ -78,40 +78,6 @@ llm = SagemakerEndpoint(
 
 retriever = AmazonKendraRetriever(index_id=kendraIndex)
 
-def save_configuration(userId, modelId):
-    item = {
-        'user-id': {'S':userId},
-        'model-id': {'S':modelId}
-    }
-
-    client = boto3.client('dynamodb')
-    try:
-        resp =  client.put_item(TableName=configTableName, Item=item)
-        print('resp, ', resp)
-    except: 
-        raise Exception ("Not able to write into dynamodb")            
-
-def load_configuration(userId):
-    print('configTableName: ', configTableName)
-    print('userId: ', userId)
-
-    client = boto3.client('dynamodb')    
-    try:
-        key = {
-            'user-id': {'S':userId}
-        }
-
-        resp = client.get_item(TableName=configTableName, Key=key)
-        print('model-id: ', resp['Item']['model-id']['S'])
-
-        return resp['Item']['model-id']['S']
-    except: 
-        print('No record of configuration!')
-        modelId = os.environ.get('model_id')
-        save_configuration(userId, modelId)
-
-        return modelId
-
 # store document into Kendra
 def store_document(s3_file_name, requestId):
     documentInfo = {
@@ -181,7 +147,7 @@ def get_answer_using_template(query):
         print(f'{len(relevant_documents)} documents are fetched which are relevant to the query.')
         print('----')
         for i, rel_doc in enumerate(relevant_documents):
-            print_ww(f'## Document {i+1}: {rel_doc.page_content}.......')
+            print(f'## Document {i+1}: {rel_doc.page_content}.......')
             print('---')
 
         prompt_template = """Human: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
@@ -221,11 +187,6 @@ def lambda_handler(event, context):
 
     global modelId, llm, kendra
     
-    modelId = load_configuration(userId)
-    if(modelId==""): 
-        modelId = os.environ.get('model_id')
-        save_configuration(userId, modelId)
-
     start = int(time.time())    
 
     msg = ""
