@@ -19,10 +19,6 @@ from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
 from langchain.retrievers import AmazonKendraRetriever
 
-module_path = "."
-sys.path.append(os.path.abspath(module_path))
-from utils import bedrock, print_ww
-
 s3 = boto3.client('s3')
 s3_bucket = os.environ.get('s3_bucket') # bucket name
 s3_prefix = os.environ.get('s3_prefix')
@@ -64,7 +60,7 @@ content_handler = ContentHandler()
 aws_region = boto3.Session().region_name
 client = boto3.client("sagemaker-runtime")
 parameters = {
-    "max_new_tokens": 256, 
+    "max_new_tokens": 512, 
     "top_p": 0.9, 
     "temperature": 0.6
 } 
@@ -77,7 +73,13 @@ llm = SagemakerEndpoint(
     content_handler = content_handler
 )
 
-
+retriever = AmazonKendraRetriever(index_id=kendraIndex)
+#kendra = boto3.client("kendra")
+#    retriever = AmazonKendraRetriever(
+#        index_id=kendraIndex,
+#        region_name=aws_region,
+#        client=kendra
+#    )
 
 # store document into Kendra
 def store_document(s3_file_name, requestId):
@@ -94,6 +96,7 @@ def store_document(s3_file_name, requestId):
         documentInfo
     ]
     
+    kendra = boto3.client("kendra")
     result = kendra.batch_put_document(
         Documents = documents,
         IndexId = kendraIndex,
@@ -138,13 +141,6 @@ def load_document(file_type, s3_file_name):
     return docs
               
 def get_answer_using_template(query):    
-    kendra = boto3.client("kendra")
-    retriever = AmazonKendraRetriever(
-        index_id=kendraIndex,
-        region_name=aws_region,
-        client=kendra
-    )
-
     relevant_documents = retriever.get_relevant_documents(query)
     print('length of relevant_documents: ', len(relevant_documents))
 
@@ -192,7 +188,7 @@ def lambda_handler(event, context):
     body = event['body']
     print('body: ', body)
 
-    global llm, kendra, retriever
+    global llm, kendra
     
     start = int(time.time())    
 
