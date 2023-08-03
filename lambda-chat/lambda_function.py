@@ -77,9 +77,6 @@ retriever = AmazonKendraRetriever(
     region_name=aws_region,
     client=kendra
 )
-#relevant_documents = retriever.get_relevant_documents("what is the generative ai?")
-#print('length of relevant_documents: ', len(relevant_documents))
-
 
 def combined_text(title: str, excerpt: str) -> str:
     if not title or not excerpt:
@@ -87,6 +84,8 @@ def combined_text(title: str, excerpt: str) -> str:
     return f"Document Title: {title} \nDocument Excerpt: \n{excerpt}\n"
 
 def to_doc(doc) -> Document:    
+    print('DocumentTitle: ', doc['DocumentTitle'])
+
     title = doc['DocumentTitle']['Text'] if doc['DocumentTitle']['Text'] else ""
     source = doc['DocumentURI']
     excerpt = doc['DocumentExcerpt']['Text']
