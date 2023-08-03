@@ -75,7 +75,7 @@ kendra = boto3.client("kendra")
 retriever = AmazonKendraRetriever(
     index_id=kendraIndex,
     region_name=aws_region,
-    client=kendra
+    #client=kendra
 )
 relevant_documents = retriever.get_relevant_documents("what is the generative ai?")
 print('length of relevant_documents: ', len(relevant_documents))
