@@ -8,7 +8,8 @@ import PyPDF2
 import csv
 from io import BytesIO
 
-from langchain.llms.bedrock import Bedrock
+from langchain import PromptTemplate, SagemakerEndpoint
+from langchain.llms.sagemaker_endpoint import LLMContentHandler
 from langchain import PromptTemplate
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.docstore.document import Document
@@ -17,21 +18,17 @@ from langchain.document_loaders import CSVLoader
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
 from langchain.retrievers import AmazonKendraRetriever
-from langchain.llms.sagemaker_endpoint import LLMContentHandler
-from langchain import SagemakerEndpoint
 
 s3 = boto3.client('s3')
 s3_bucket = os.environ.get('s3_bucket') # bucket name
 s3_prefix = os.environ.get('s3_prefix')
 callLogTableName = os.environ.get('callLogTableName')
 configTableName = os.environ.get('configTableName')
-endpoint_url = os.environ.get('endpoint_url')
-bedrock_region = os.environ.get('bedrock_region')
 kendraIndex = os.environ.get('kendraIndex')
 roleArn = os.environ.get('roleArn')
-modelId = os.environ.get('model_id')
-print('model_id: ', modelId)
+endpoint_name = os.environ.get('endpoint')
 
+# initiate llm model based on langchain
 class ContentHandler(LLMContentHandler):
     content_type = "application/json"
     accepts = "application/json"
@@ -76,40 +73,12 @@ llm = SagemakerEndpoint(
 )
 
 retriever = AmazonKendraRetriever(index_id=kendraIndex)
-
-def save_configuration(userId, modelId):
-    item = {
-        'user-id': {'S':userId},
-        'model-id': {'S':modelId}
-    }
-
-    client = boto3.client('dynamodb')
-    try:
-        resp =  client.put_item(TableName=configTableName, Item=item)
-        print('resp, ', resp)
-    except: 
-        raise Exception ("Not able to write into dynamodb")            
-
-def load_configuration(userId):
-    print('configTableName: ', configTableName)
-    print('userId: ', userId)
-
-    client = boto3.client('dynamodb')    
-    try:
-        key = {
-            'user-id': {'S':userId}
-        }
-
-        resp = client.get_item(TableName=configTableName, Key=key)
-        print('model-id: ', resp['Item']['model-id']['S'])
-
-        return resp['Item']['model-id']['S']
-    except: 
-        print('No record of configuration!')
-        modelId = os.environ.get('model_id')
-        save_configuration(userId, modelId)
-
-        return modelId
+#kendra = boto3.client("kendra")
+#    retriever = AmazonKendraRetriever(
+#        index_id=kendraIndex,
+#        region_name=aws_region,
+#        client=kendra
+#    )
 
 # store document into Kendra
 def store_document(s3_file_name, requestId):
@@ -118,14 +87,14 @@ def store_document(s3_file_name, requestId):
             "Bucket": s3_bucket,
             "Key": s3_prefix+'/'+s3_file_name
         },
-        "Title": "Document from client",
+        "Title": s3_file_name,
         "Id": requestId
     }
 
     documents = [
         documentInfo
     ]
-
+    
     kendra = boto3.client("kendra")
     result = kendra.batch_put_document(
         Documents = documents,
@@ -170,7 +139,8 @@ def load_document(file_type, s3_file_name):
     ]
     return docs
               
-def get_answer_using_template(query):
+def get_answer_using_template(query):    
+    retriever = AmazonKendraRetriever(index_id=kendraIndex)
     relevant_documents = retriever.get_relevant_documents(query)
     print('length of relevant_documents: ', len(relevant_documents))
 
@@ -218,97 +188,59 @@ def lambda_handler(event, context):
     body = event['body']
     print('body: ', body)
 
-    global modelId, llm, kendra
+    global llm, kendra
     
-    modelId = load_configuration(userId)
-    if(modelId==""): 
-        modelId = os.environ.get('model_id')
-        save_configuration(userId, modelId)
-
     start = int(time.time())    
 
     msg = ""
-    if type == 'text' and body[:11] == 'list models':
-        msg = f"The list of models: \n"
-        lists = modelInfo['modelSummaries']
-        
-        for model in lists:
-            msg += f"{model['modelId']}\n"
-        
-        msg += f"current model: {modelId}"
-        print('model lists: ', msg)
     
-    elif type == 'text' and body[:20] == 'change the model to ':
-        new_model = body.rsplit('to ', 1)[-1]
-        print(f"new model: {new_model}, current model: {modelId}")
-
-        if modelId == new_model:
-            msg = "No change! The new model is the same as the current model."
-        else:        
-            lists = modelInfo['modelSummaries']
-            isChanged = False
-            for model in lists:
-                if model['modelId'] == new_model:
-                    print(f"new modelId: {new_model}")
-                    modelId = new_model
-                    llm = Bedrock(model_id=modelId, client=boto3_bedrock)
-                    isChanged = True
-                    save_configuration(userId, modelId)            
-
-            if isChanged:
-                msg = f"The model is changed to {modelId}"
-            else:
-                msg = f"{modelId} is not in lists."
+    if type == 'text':
+        text = body
+        msg = get_answer_using_template(text)
         print('msg: ', msg)
-
-    else:             
-        if type == 'text':
-            text = body
-            msg = get_answer_using_template(text)
-            print('msg: ', msg)
             
-        elif type == 'document':
-            object = body
+    elif type == 'document':
+        object = body
                     
-            # stor the object into kendra
-            store_document(object, requestId)
+        # store the object into kendra
+        store_document(object, requestId)
 
-            # summerization to show the document
-            file_type = object[object.rfind('.')+1:len(object)]
-            print('file_type: ', file_type)
+        # summerization to show the document
+        file_type = object[object.rfind('.')+1:len(object)]
+        print('file_type: ', file_type)
             
-            docs = load_document(file_type, object)
-            prompt_template = """Write a concise summary of the following:
+        docs = load_document(file_type, object)
+        prompt_template = """Write a concise summary of the following:
 
-            {text}
+        {text}
                 
-            CONCISE SUMMARY """
+        CONCISE SUMMARY """
 
-            PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
-            chain = load_summarize_chain(llm, chain_type="stuff", prompt=PROMPT)
-            summary = chain.run(docs)
-            print('summary: ', summary)
+        PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
+        chain = load_summarize_chain(llm, chain_type="stuff", prompt=PROMPT)
+        summary = chain.run(docs)
+        print('summary: ', summary)
 
-            msg = summary
+        msg = summary
 
-        elapsed_time = int(time.time()) - start
-        print("total run time(sec): ", elapsed_time)
+    elapsed_time = int(time.time()) - start
+    print("total run time(sec): ", elapsed_time)
 
-        item = {
-            'user-id': {'S':userId},
-            'request-id': {'S':requestId},
-            'type': {'S':type},
-            'body': {'S':body},
-            'msg': {'S':msg}
-        }
+    item = {
+        'user-id': {'S':userId},
+        'request-id': {'S':requestId},
+        'type': {'S':type},
+        'body': {'S':body},
+        'msg': {'S':msg}
+    }
 
-        client = boto3.client('dynamodb')
-        try:
-            resp =  client.put_item(TableName=callLogTableName, Item=item)
-        except: 
-            raise Exception ("Not able to write into dynamodb")
+    client = boto3.client('dynamodb')
+    try:
+        resp =  client.put_item(TableName=callLogTableName, Item=item)
+    except: 
+        raise Exception ("Not able to write into dynamodb")
         
-        print('resp, ', resp)
+    print('resp, ', resp)
 
     return {
         'statusCode': 200,
