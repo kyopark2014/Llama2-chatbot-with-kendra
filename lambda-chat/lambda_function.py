@@ -190,7 +190,7 @@ def lambda_handler(event, context):
     body = event['body']
     print('body: ', body)
 
-    global llm, kendra
+    global llm, kendra, retriever
     
     start = int(time.time())    
 
