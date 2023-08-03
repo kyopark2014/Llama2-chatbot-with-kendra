@@ -81,7 +81,7 @@ retriever = AmazonKendraRetriever(
 #print('length of relevant_documents: ', len(relevant_documents))
 
 def kendraQuery(query):
-    response = kendra.query(QueryText=query, IndexId=kendraIndex)
+    response = kendra.retrieve(QueryText=query, IndexId=kendraIndex)
     print('response: ', response)
     for query_result in response['ResultItems']:
         begin = 0
@@ -158,15 +158,6 @@ def load_document(file_type, s3_file_name):
     return docs
               
 def get_answer_using_template(query):    
-    
-
-    response = kendra.retrieve(
-        IndexId=kendraIndex,
-        QueryText=query.strip(),
-        #PageSize=top_k,
-        #AttributeFilter=attribute_filter,
-    )
-    print('response: ', response)
 
     #relevant_documents = retriever.get_relevant_documents(query)
     relevant_documents = kendraQuery(query)
