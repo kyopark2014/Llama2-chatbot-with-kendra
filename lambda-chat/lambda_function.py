@@ -28,6 +28,48 @@ kendraIndex = os.environ.get('kendraIndex')
 roleArn = os.environ.get('roleArn')
 endpoint_name = os.environ.get('endpoint')
 
+aws_region = boto3.Session().region_name
+
+kendra = boto3.client("kendra")
+
+# Provide the index ID
+index_id = kendraIndex
+# Provide the query text
+query = "how does amazon kendra work?"
+# You can retrieve up to 100 relevant passages
+# You can paginate 100 passages across 10 pages, for example
+page_size = 10
+page_number = 10
+
+result = kendra.retrieve(
+        IndexId = index_id,
+        QueryText = query,
+        PageSize = page_size,
+        PageNumber = page_number)
+
+print("\nRetrieved passage results for query: " + query + "\n")        
+
+for retrieve_result in result["ResultItems"]:
+
+    print("-------------------")
+    print("Title: " + str(retrieve_result["DocumentTitle"]))
+    print("URI: " + str(retrieve_result["DocumentURI"]))
+    print("Passage content: " + str(retrieve_result["Content"]))
+    print("------------------\n\n")
+
+
+kendraClient = boto3.client("kendra", region_name=aws_region)
+
+response = kendraClient.retrieve(QueryText="tell me what is the gen ai", IndexId=kendraIndex)
+print('retrieve result: ', response)
+
+retriever = AmazonKendraRetriever(
+    index_id=kendraIndex,
+    region_name=aws_region,
+    client=kendraClient
+)
+
+
 class ContentHandler(LLMContentHandler):
     content_type = "application/json"
     accepts = "application/json"
@@ -55,7 +97,6 @@ class ContentHandler(LLMContentHandler):
         return response_json[0]["generation"]["content"]
 
 content_handler = ContentHandler()
-aws_region = boto3.Session().region_name
 client = boto3.client("sagemaker-runtime")
 parameters = {
     "max_new_tokens": 512, 
@@ -70,47 +111,6 @@ llm = SagemakerEndpoint(
     endpoint_kwargs={"CustomAttributes": "accept_eula=true"},
     content_handler = content_handler
 )
-
-
-kendra = boto3.client("kendra")
-
-# Provide the index ID
-index_id = "index-id"
-# Provide the query text
-query = "how does amazon kendra work?"
-# You can retrieve up to 100 relevant passages
-# You can paginate 100 passages across 10 pages, for example
-page_size = 10
-page_number = 10
-
-result = kendra.retrieve(
-        IndexId = index_id,
-        QueryText = query,
-        PageSize = page_size,
-        PageNumber = page_number)
-
-print("\nRetrieved passage results for query: " + query + "\n")        
-
-for retrieve_result in result["ResultItems"]:
-
-    print("-------------------")
-    print("Title: " + str(retrieve_result["DocumentTitle"]))
-    print("URI: " + str(retrieve_result["DocumentURI"]))
-    print("Passage content: " + str(retrieve_result["Content"]))
-    print("------------------\n\n")
-    
-
-kendraClient = boto3.client("kendra", region_name=aws_region)
-
-response = kendraClient.retrieve(QueryText="tell me what is the gen ai", IndexId=kendraIndex)
-print('retrieve result: ', response)
-
-retriever = AmazonKendraRetriever(
-    index_id=kendraIndex,
-    region_name=aws_region,
-    client=kendraClient
-)
-
 
 def combined_text(title: str, excerpt: str) -> str:
     if not title or not excerpt:
