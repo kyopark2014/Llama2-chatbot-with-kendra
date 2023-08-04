@@ -142,6 +142,7 @@ export class CdkChatbotLlama2KendraStack extends cdk.Stack {
       roleName: `role-lambda-chat-for-${projectName}`,
       assumedBy: new iam.CompositePrincipal(
         new iam.ServicePrincipal("lambda.amazonaws.com"),
+        new iam.ServicePrincipal("sagemaker.amazonaws.com"),
         new iam.ServicePrincipal("kendra.amazonaws.com")
       )
     });
