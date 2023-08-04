@@ -71,6 +71,35 @@ llm = SagemakerEndpoint(
     content_handler = content_handler
 )
 
+
+kendra = boto3.client("kendra")
+
+# Provide the index ID
+index_id = "index-id"
+# Provide the query text
+query = "how does amazon kendra work?"
+# You can retrieve up to 100 relevant passages
+# You can paginate 100 passages across 10 pages, for example
+page_size = 10
+page_number = 10
+
+result = kendra.retrieve(
+        IndexId = index_id,
+        QueryText = query,
+        PageSize = page_size,
+        PageNumber = page_number)
+
+print("\nRetrieved passage results for query: " + query + "\n")        
+
+for retrieve_result in result["ResultItems"]:
+
+    print("-------------------")
+    print("Title: " + str(retrieve_result["DocumentTitle"]))
+    print("URI: " + str(retrieve_result["DocumentURI"]))
+    print("Passage content: " + str(retrieve_result["Content"]))
+    print("------------------\n\n")
+    
+
 kendraClient = boto3.client("kendra", region_name=aws_region)
 
 response = kendraClient.retrieve(QueryText="tell me what is the gen ai", IndexId=kendraIndex)
