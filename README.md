@@ -127,7 +127,7 @@ roleLambda.attachInlinePolicy(
 
 #### Kendra에서 retrieve 사용
 
-Kendra에서 결과를 검색할때 사용하는 [Query](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/kendra/client/query.html)는 결과가 100 token이내로만 얻을수 있으므로, [retrieve](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/kendra/client/retrieve.html)를 이용합니다.
+Kendra에서 결과를 검색할때 사용하는 [Query](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/kendra/client/query.html)는 결과가 100 token이내로만 얻을수 있으므로, [retrieve](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/kendra/client/retrieve.html)는 200까지 가능합니다.
 
 Query 이용법은 아래와 같으며, Retrieve도 유사하게 사용할 수 있습니다.
 
@@ -167,6 +167,27 @@ def kendraQuery(query):
 
 relevant_documents = kendraQuery(query)
 ```
+
+LangChain에서 제공하는 kendra용 retriever는 아래와 같이 사용하여야 합니다. 그런데 AmazonKendraRetriever는 kendra client에서 retrieve를 사용합니다.
+
+```python
+kendraClient = boto3.client("kendra", region_name=aws_region)
+retriever = AmazonKendraRetriever(
+    index_id=kendraIndex,
+    region_name=aws_region,
+    client=kendraClient
+)
+relevant_documents = retriever.get_relevant_documents(query)
+```
+
+Kendra Developer 버전사용시 아래와 같은 에러가 발생합니다.
+
+```text
+[ERROR] AttributeError: 'kendra' object has no attribute 'retrieve'
+```
+
+[Retrieving passages](https://docs.aws.amazon.com/kendra/latest/dg/searching-retrieve.html)에서는 "Kendra Developer Edition"에서 사용할수 없고 "Kendra Enterprise Edition"을 사용하여야 합니다. 그동안 Tokyo region에서는 Developer edition에서도 retrieve 사용이 가능하였으나, N.Virginia (us-east-1)에서 엄격하게 적용되어 사용이 불가한것으로 보여집니다.
+따라서, Enterprise Edition으로 테스트 하여야 합니다.
 
 
 
