@@ -3,9 +3,9 @@ FROM amazon/aws-lambda-python:3.9
 
 RUN /var/lang/bin/python3.9 -m pip install --upgrade pip
 RUN /var/lang/bin/python3.9 -m pip install --upgrade boto3
-RUN /var/lang/bin/python3.9 -m pip install PyPDF2==0.0.251
+RUN /var/lang/bin/python3.9 -m pip install PyPDF2
 #RUN /var/lang/bin/python3.8 -m pip install langchain==0.0.229
-RUN /var/lang/bin/python3.9 -m pip install langchain
+RUN /var/lang/bin/python3.9 -m pip install langchain==0.0.251
 
 WORKDIR /var/task/lambda-chat
 
