@@ -71,17 +71,13 @@ llm = SagemakerEndpoint(
     content_handler = content_handler
 )
 
+print('aws_region: ', aws_region)
 kendraClient = boto3.client("kendra", region_name=aws_region)
-
-response = kendraClient.retrieve(QueryText="tell me what is the gen ai", IndexId=kendraIndex)
-print('retrieve result: ', response)
-
 retriever = AmazonKendraRetriever(
     index_id=kendraIndex,
     region_name=aws_region,
     client=kendraClient
 )
-
 
 def combined_text(title: str, excerpt: str) -> str:
     if not title or not excerpt:
@@ -131,6 +127,10 @@ def store_document(s3_file_name, requestId):
         RoleArn = roleArn
     )
     print(result)
+
+    response = kendraClient.retrieve(QueryText="tell me what is the gen ai", IndexId=kendraIndex)
+    print('retrieve result: ', response)
+    
 
 # load documents from s3
 def load_document(file_type, s3_file_name):
