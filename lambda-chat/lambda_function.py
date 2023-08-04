@@ -8,16 +8,6 @@ import PyPDF2
 import csv
 from io import BytesIO
 
-from langchain import PromptTemplate, SagemakerEndpoint
-from langchain.llms.sagemaker_endpoint import LLMContentHandler
-from langchain import PromptTemplate
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.docstore.document import Document
-from langchain.chains.summarize import load_summarize_chain
-from langchain.document_loaders import CSVLoader
-from langchain.chains import RetrievalQA
-from langchain.prompts import PromptTemplate
-from langchain.retrievers import AmazonKendraRetriever
 
 s3 = boto3.client('s3')
 s3_bucket = os.environ.get('s3_bucket') # bucket name
@@ -62,6 +52,17 @@ kendraClient = boto3.client("kendra", region_name=aws_region)
 
 response = kendraClient.retrieve(QueryText="tell me what is the gen ai", IndexId=kendraIndex)
 print('retrieve result: ', response)
+
+from langchain import PromptTemplate, SagemakerEndpoint
+from langchain.llms.sagemaker_endpoint import LLMContentHandler
+from langchain import PromptTemplate
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.docstore.document import Document
+from langchain.chains.summarize import load_summarize_chain
+from langchain.document_loaders import CSVLoader
+from langchain.chains import RetrievalQA
+from langchain.prompts import PromptTemplate
+from langchain.retrievers import AmazonKendraRetriever
 
 retriever = AmazonKendraRetriever(
     index_id=kendraIndex,
