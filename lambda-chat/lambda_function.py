@@ -71,6 +71,7 @@ llm = SagemakerEndpoint(
     content_handler = content_handler
 )
 
+print('aws_region: ', aws_region)
 kendraClient = boto3.client("kendra", region_name=aws_region)
 retriever = AmazonKendraRetriever(
     index_id=kendraIndex,
@@ -92,7 +93,8 @@ def to_doc(body) -> Document:
     return Document(page_content=page_content, metadata=metadata)
 
 def kendraQuery(query):
-    response = kendraClient.query(QueryText=query, IndexId=kendraIndex)
+    #response = kendraClient.query(QueryText=query, IndexId=kendraIndex)
+    response = kendraClient.retrieve(QueryText=query, IndexId=kendraIndex)
     
     docs = []
     for query_result in response['ResultItems']:
@@ -125,6 +127,10 @@ def store_document(s3_file_name, requestId):
         RoleArn = roleArn
     )
     print(result)
+
+    response = kendraClient.retrieve(QueryText="tell me what is the gen ai", IndexId=kendraIndex)
+    print('retrieve result: ', response)
+    
 
 # load documents from s3
 def load_document(file_type, s3_file_name):
