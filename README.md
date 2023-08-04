@@ -143,11 +143,6 @@ Query 이용법은 아래와 같으며, Retrieve도 유사하게 사용할 수 �
 
 ```python
 kendraClient = boto3.client("kendra", region_name = aws_region)
-retriever = AmazonKendraRetriever(
-    index_id = kendraIndex,
-    region_name = aws_region,
-    client = kendraClient
-)
 
 def combined_text(title: str, excerpt: str) -> str:
     if not title or not excerpt:
@@ -178,7 +173,7 @@ def kendraQuery(query):
 relevant_documents = kendraQuery(query)
 ```
 
-LangChain에서 제공하는 kendra용 retriever는 아래와 같이 [AmazonKendraRetriever](https://api.python.langchain.com/en/latest/retrievers/langchain.retrievers.kendra.AmazonKendraRetriever.html)를 사용하여야 하는데, 이것은 내부적으로 kendra client를 이용하고 있습니다. 
+LangChain에서 제공하는 kendra용 retriever는 아래와 같이 [AmazonKendraRetriever](https://api.python.langchain.com/en/latest/retrievers/langchain.retrievers.kendra.AmazonKendraRetriever.html)를 사용하여야 하는데, 이것은 내부적으로 [kendra client의 retrieve](https://docs.aws.amazon.com/kendra/latest/dg/searching-retrieve.html) 이용하고 있습니다. 
 
 ```python
 kendraClient = boto3.client("kendra", region_name=aws_region)
@@ -190,7 +185,7 @@ retriever = AmazonKendraRetriever(
 relevant_documents = retriever.get_relevant_documents(query)
 ```
 
-Kendra Developer 버전사용시 아래와 같은 에러가 발생하였습니다. 
+Kendra developer edition을 사용시 아래와 같은 에러가 발생하였습니다. 
 
 ```text
 [ERROR] AttributeError: 'kendra' object has no attribute 'retrieve'
