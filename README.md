@@ -125,6 +125,16 @@ roleLambda.attachInlinePolicy(
 );
 ```
 
+이후, 아래와 같이 Enterprise Edition으로 Kendra를 설치합니다. 
+
+```python
+const cfnIndex = new kendra.CfnIndex(this, 'MyCfnIndex', {
+    edition: 'ENTERPRISE_EDITION',  
+    name: `reg-kendra-${projectName}`,
+    roleArn: roleKendra.roleArn,
+});
+```
+
 #### Troubleshooting: Kendra에서 retrieve 사용
 
 Kendra에서 결과를 검색할때 사용하는 [Query](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/kendra/client/query.html)는 결과가 100 token이내로만 얻을수 있으므로, [retrieve](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/kendra/client/retrieve.html)는 200까지 가능합니다.
