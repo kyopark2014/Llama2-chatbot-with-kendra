@@ -110,7 +110,7 @@ export class CdkChatbotLlama2KendraStack extends cdk.Stack {
       )
     });
     const cfnIndex = new kendra.CfnIndex(this, 'MyCfnIndex', {
-      edition: 'ENTERPRISE_EDITION',  // ENTERPRISE_EDITION, DEVELOPER_EDITION
+      edition: 'DEVELOPER_EDITION',  // ENTERPRISE_EDITION
       name: `reg-kendra-${projectName}`,
       roleArn: roleKendra.roleArn,
     });     
@@ -142,7 +142,6 @@ export class CdkChatbotLlama2KendraStack extends cdk.Stack {
       roleName: `role-lambda-chat-for-${projectName}`,
       assumedBy: new iam.CompositePrincipal(
         new iam.ServicePrincipal("lambda.amazonaws.com"),
-        new iam.ServicePrincipal("sagemaker.amazonaws.com"),
         new iam.ServicePrincipal("kendra.amazonaws.com")
       )
     });

@@ -8,51 +8,6 @@ import PyPDF2
 import csv
 from io import BytesIO
 
-
-s3 = boto3.client('s3')
-s3_bucket = os.environ.get('s3_bucket') # bucket name
-s3_prefix = os.environ.get('s3_prefix')
-callLogTableName = os.environ.get('callLogTableName')
-configTableName = os.environ.get('configTableName')
-kendraIndex = os.environ.get('kendraIndex')
-roleArn = os.environ.get('roleArn')
-endpoint_name = os.environ.get('endpoint')
-
-aws_region = boto3.Session().region_name
-
-kendra = boto3.client("kendra")
-
-# Provide the index ID
-index_id = kendraIndex
-# Provide the query text
-query = "how does amazon kendra work?"
-# You can retrieve up to 100 relevant passages
-# You can paginate 100 passages across 10 pages, for example
-page_size = 10
-page_number = 10
-
-result = kendra.retrieve(
-        IndexId = index_id,
-        QueryText = query,
-        PageSize = page_size,
-        PageNumber = page_number)
-
-print("\nRetrieved passage results for query: " + query + "\n")        
-
-for retrieve_result in result["ResultItems"]:
-
-    print("-------------------")
-    print("Title: " + str(retrieve_result["DocumentTitle"]))
-    print("URI: " + str(retrieve_result["DocumentURI"]))
-    print("Passage content: " + str(retrieve_result["Content"]))
-    print("------------------\n\n")
-
-
-kendraClient = boto3.client("kendra", region_name=aws_region)
-
-response = kendraClient.retrieve(QueryText="tell me what is the gen ai", IndexId=kendraIndex)
-print('retrieve result: ', response)
-
 from langchain import PromptTemplate, SagemakerEndpoint
 from langchain.llms.sagemaker_endpoint import LLMContentHandler
 from langchain import PromptTemplate
@@ -64,12 +19,14 @@ from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
 from langchain.retrievers import AmazonKendraRetriever
 
-retriever = AmazonKendraRetriever(
-    index_id=kendraIndex,
-    region_name=aws_region,
-    client=kendraClient
-)
-
+s3 = boto3.client('s3')
+s3_bucket = os.environ.get('s3_bucket') # bucket name
+s3_prefix = os.environ.get('s3_prefix')
+callLogTableName = os.environ.get('callLogTableName')
+configTableName = os.environ.get('configTableName')
+kendraIndex = os.environ.get('kendraIndex')
+roleArn = os.environ.get('roleArn')
+endpoint_name = os.environ.get('endpoint')
 
 class ContentHandler(LLMContentHandler):
     content_type = "application/json"
@@ -98,6 +55,7 @@ class ContentHandler(LLMContentHandler):
         return response_json[0]["generation"]["content"]
 
 content_handler = ContentHandler()
+aws_region = boto3.Session().region_name
 client = boto3.client("sagemaker-runtime")
 parameters = {
     "max_new_tokens": 512, 
@@ -113,32 +71,12 @@ llm = SagemakerEndpoint(
     content_handler = content_handler
 )
 
-def combined_text(title: str, excerpt: str) -> str:
-    if not title or not excerpt:
-        return ""
-    return f"Document Title: {title} \nDocument Excerpt: \n{excerpt}\n"
-
-def to_doc(body) -> Document:    
-    title = body['DocumentTitle']['Text'] if body['DocumentTitle']['Text'] else ""
-    source = body['DocumentURI']
-    excerpt = body['DocumentExcerpt']['Text']
-    page_content = combined_text(title, excerpt)    
-    metadata = {"source": source, "title": title}
-    return Document(page_content=page_content, metadata=metadata)
-
-def kendraQuery(query):
-    #response = kendraClient.query(QueryText=query, IndexId=kendraIndex)
-    response = kendraClient.retrieve(QueryText=query, IndexId=kendraIndex)
-    
-    docs = []
-    for query_result in response['ResultItems']:
-        print('query_result: ', query_result)
-        doc = to_doc(query_result)
-        print('doc: ', doc)
-
-        docs.append(doc)
-
-    return docs                
+kendra = boto3.client("kendra", region_name=aws_region)
+retriever = AmazonKendraRetriever(
+    index_id=kendraIndex,
+    region_name=aws_region,
+    client=kendra
+)
 
 # store document into Kendra
 def store_document(s3_file_name, requestId):
@@ -155,7 +93,7 @@ def store_document(s3_file_name, requestId):
         documentInfo
     ]
         
-    result = kendraClient.batch_put_document(
+    result = kendra.batch_put_document(
         Documents = documents,
         IndexId = kendraIndex,
         RoleArn = roleArn
@@ -199,8 +137,7 @@ def load_document(file_type, s3_file_name):
     return docs
               
 def get_answer_using_template(query):    
-    #relevant_documents = retriever.get_relevant_documents(query)
-    relevant_documents = kendraQuery(query)
+    relevant_documents = retriever.get_relevant_documents(query)
     print('length of relevant_documents: ', len(relevant_documents))
     print('relevant_documents: ', relevant_documents)    
     
@@ -248,7 +185,7 @@ def lambda_handler(event, context):
     body = event['body']
     print('body: ', body)
 
-    global llm, kendraClient
+    global llm, kendra
     
     start = int(time.time())    
 
