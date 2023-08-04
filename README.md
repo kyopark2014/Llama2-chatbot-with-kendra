@@ -123,7 +123,52 @@ roleLambda.attachInlinePolicy(
         statements: [passRolePolicy],
     }),
 );
-```  
+```
+
+#### Kendra에서 retrieve 사용
+
+Kendra에서 결과를 검색할때 사용하는 [Query](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/kendra/client/query.html)는 결과가 100 token이내로만 얻을수 있으므로, [retrieve](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/kendra/client/retrieve.html)를 이용합니다.
+
+Query 이용법은 아래와 같으며, Retrieve도 유사하게 사용할 수 있습니다.
+
+```python
+kendraClient = boto3.client("kendra", region_name = aws_region)
+retriever = AmazonKendraRetriever(
+    index_id = kendraIndex,
+    region_name = aws_region,
+    client = kendraClient
+)
+
+def combined_text(title: str, excerpt: str) -> str:
+    if not title or not excerpt:
+        return ""
+    return f"Document Title: {title} \nDocument Excerpt: \n{excerpt}\n"
+
+def to_doc(body) -> Document:
+    title = body['DocumentTitle']['Text'] if body['DocumentTitle']['Text'] else ""
+    source = body['DocumentURI']
+    excerpt = body['DocumentExcerpt']['Text']
+    page_content = combined_text(title, excerpt)
+    metadata = { "source": source, "title": title }
+    return Document(page_content = page_content, metadata = metadata)
+
+def kendraQuery(query):
+    response = kendraClient.query(QueryText = query, IndexId = kendraIndex)
+
+    docs = []
+    for query_result in response['ResultItems']:
+        print('query_result: ', query_result)
+        doc = to_doc(query_result)
+        print('doc: ', doc)
+
+        docs.append(doc)
+
+    return docs
+
+relevant_documents = kendraQuery(query)
+```
+
+
 
 ### LangChain으로 연결하기
 
