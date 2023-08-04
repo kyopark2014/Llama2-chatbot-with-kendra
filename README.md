@@ -125,7 +125,7 @@ roleLambda.attachInlinePolicy(
 );
 ```
 
-이후, 아래와 같이 Enterprise Edition으로 Kendra를 설치합니다. 
+이후, 아래와 같이 Kendra를 설치합니다. 
 
 ```python
 const cfnIndex = new kendra.CfnIndex(this, 'MyCfnIndex', {
@@ -191,7 +191,7 @@ Kendra developer edition을 사용시 아래와 같은 에러가 발생하였습
 [ERROR] AttributeError: 'kendra' object has no attribute 'retrieve'
 ```
 
-[Retrieving passages](https://docs.aws.amazon.com/kendra/latest/dg/searching-retrieve.html)에 따르면, retrieve는 "Kendra Developer Edition"에서 사용할수 없고 "Kendra Enterprise Edition"을 사용하여야 합니다. 그동안 Tokyo region에서 Developer edition으로도 retrieve 사용이 가능하였으나, N.Virginia (us-east-1)에서는 엄격하게 기준이 적용되는것으로 보여집니다. 따라서, Enterprise Edition으로 테스트 하여야 합니다.
+[Retrieving passages](https://docs.aws.amazon.com/kendra/latest/dg/searching-retrieve.html)에 따르면, retrieve는 "Kendra Developer Edition"에서 사용할수 없고 "Kendra Enterprise Edition"을 사용하여야 합니다. 
 
 
 
