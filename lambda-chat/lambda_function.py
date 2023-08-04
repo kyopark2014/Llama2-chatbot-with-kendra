@@ -71,11 +71,11 @@ llm = SagemakerEndpoint(
     content_handler = content_handler
 )
 
-kendra = boto3.client("kendra", region_name=aws_region)
+kendraClient = boto3.client("kendra", region_name=aws_region)
 retriever = AmazonKendraRetriever(
     index_id=kendraIndex,
     region_name=aws_region,
-    client=kendra
+    client=kendraClient
 )
 
 def combined_text(title: str, excerpt: str) -> str:
@@ -84,19 +84,15 @@ def combined_text(title: str, excerpt: str) -> str:
     return f"Document Title: {title} \nDocument Excerpt: \n{excerpt}\n"
 
 def to_doc(body) -> Document:    
-    print('body: ', body)
-    print('DocumentTitle: ', body['DocumentTitle'])
-
     title = body['DocumentTitle']['Text'] if body['DocumentTitle']['Text'] else ""
     source = body['DocumentURI']
     excerpt = body['DocumentExcerpt']['Text']
-    print('excerpt: ', excerpt)
     page_content = combined_text(title, excerpt)    
     metadata = {"source": source, "title": title}
     return Document(page_content=page_content, metadata=metadata)
 
 def kendraQuery(query):
-    response = kendra.query(QueryText=query, IndexId=kendraIndex)
+    response = kendraClient.query(QueryText=query, IndexId=kendraIndex)
     
     docs = []
     for query_result in response['ResultItems']:
@@ -106,8 +102,7 @@ def kendraQuery(query):
 
         docs.append(doc)
 
-    return docs
-                
+    return docs                
 
 # store document into Kendra
 def store_document(s3_file_name, requestId):
@@ -124,7 +119,7 @@ def store_document(s3_file_name, requestId):
         documentInfo
     ]
         
-    result = kendra.batch_put_document(
+    result = kendraClient.batch_put_document(
         Documents = documents,
         IndexId = kendraIndex,
         RoleArn = roleArn
@@ -217,7 +212,7 @@ def lambda_handler(event, context):
     body = event['body']
     print('body: ', body)
 
-    global llm, kendra
+    global llm, kendraClient
     
     start = int(time.time())    
 
