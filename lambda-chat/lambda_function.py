@@ -177,11 +177,11 @@ def get_answer_using_template_backup(query):
         return result['result']
 
 def get_kendra_results_RetrieveAPI(question, index_id):
-    kendra = boto3.client('kendra',region_name=kendra_region)
+    kendra_client = boto3.client('kendra',region_name=kendra_region)
     try:
         page_size = 2
         page_number = 1
-        result = kendra.query(
+        result = kendra_client.retrieve(
                 IndexId = index_id,
                 QueryText = question,
                 PageSize = page_size,
