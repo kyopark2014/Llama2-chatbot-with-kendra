@@ -18,7 +18,7 @@ const s3_prefix = 'docs';
 const projectName = "llama2-with-kendra";
 const bucketName = `storage-for-${projectName}`;
 const endpoint = 'jumpstart-dft-meta-textgeneration-llama-2-7b-f';
-const kendra_region = 'us-west-2';
+const kendra_region = 'us-west-2'; // process.env.CDK_DEFAULT_ACCOUNT;
 
 export class CdkChatbotLlama2KendraStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -120,7 +120,8 @@ export class CdkChatbotLlama2KendraStack extends cdk.Stack {
       description: 'The index of kendra',
     }); 
 
-    const region = process.env.CDK_DEFAULT_REGION;
+    //const region = process.env.CDK_DEFAULT_REGION;
+    const region = kendra_region;
     const accountId = process.env.CDK_DEFAULT_ACCOUNT;
     const kendraResourceArn = `arn:aws:kendra:${region}:${accountId}:index/${cfnIndex.attrId}`
     if(debug) {

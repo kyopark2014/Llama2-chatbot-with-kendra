@@ -181,7 +181,7 @@ def get_kendra_results_RetrieveAPI(question, index_id):
     try:
         page_size = 2
         page_number = 1
-        result = kendra.retrieve(
+        result = kendra.query(
                 IndexId = index_id,
                 QueryText = question,
                 PageSize = page_size,
