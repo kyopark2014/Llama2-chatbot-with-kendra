@@ -18,6 +18,7 @@ const s3_prefix = 'docs';
 const projectName = "llama2-with-kendra";
 const bucketName = `storage-for-${projectName}`;
 const endpoint = 'jumpstart-dft-meta-textgeneration-llama-2-7b-f';
+const kendra_region = 'us-west-2';
 
 export class CdkChatbotLlama2KendraStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -194,6 +195,7 @@ export class CdkChatbotLlama2KendraStack extends cdk.Stack {
         callLogTableName: callLogTableName,
         configTableName: configTableName,
         kendraIndex: cfnIndex.attrId,
+        kendra_region: kendra_region,
         roleArn: roleLambda.roleArn,
         endpoint: endpoint
       }

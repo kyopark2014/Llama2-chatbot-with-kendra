@@ -28,6 +28,7 @@ configTableName = os.environ.get('configTableName')
 kendraIndex = os.environ.get('kendraIndex')
 roleArn = os.environ.get('roleArn')
 endpoint_name = os.environ.get('endpoint')
+kendra_region = os.environ.get('kendra_region')
 
 class ContentHandler(LLMContentHandler):
     content_type = "application/json"
@@ -176,7 +177,7 @@ def get_answer_using_template_backup(query):
         return result['result']
 
 def get_kendra_results_RetrieveAPI(question, index_id):
-    kendra = boto3.client('kendra',region_name="us-east-1")
+    kendra = boto3.client('kendra',region_name=kendra_region)
     try:
         page_size = 2
         page_number = 1
