@@ -138,7 +138,7 @@ def load_document(file_type, s3_file_name):
     ]
     return docs
               
-def get_answer_using_template_backup(query):    
+def get_answer_using_template(query):    
     relevant_documents = retriever.get_relevant_documents(query)
     print('length of relevant_documents: ', len(relevant_documents))
     print('relevant_documents: ', relevant_documents)    
@@ -197,7 +197,7 @@ def get_kendra_results_RetrieveAPI(question, index_id):
         context =context + '] '
     return context
 
-def get_answer_using_template(query):    
+def get_answer_using_template_test(query):    
 
     context = get_kendra_results_RetrieveAPI(query, kendraIndex)
     print('context: ', context)
