@@ -19,6 +19,9 @@ const projectName = "llama2-with-kendra";
 const bucketName = `storage-for-${projectName}`;
 const endpoint = 'jumpstart-dft-meta-textgeneration-llama-2-7b-f';
 const kendra_region = 'us-west-2'; // process.env.CDK_DEFAULT_ACCOUNT;
+const enableConversationMode = 'ture';
+const enableReference = 'false';
+const enableRAG = 'true';
 
 export class CdkChatbotLlama2KendraStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -198,7 +201,10 @@ export class CdkChatbotLlama2KendraStack extends cdk.Stack {
         kendraIndex: cfnIndex.attrId,
         kendra_region: kendra_region,
         roleArn: roleLambda.roleArn,
-        endpoint: endpoint
+        endpoint: endpoint,
+        enableConversationMode: enableConversationMode,
+        enableReference: enableReference,
+        enableRAG: enableRAG
       }
     });     
     lambdaChatApi.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));  
