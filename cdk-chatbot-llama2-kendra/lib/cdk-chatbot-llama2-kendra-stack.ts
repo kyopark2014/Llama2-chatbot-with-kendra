@@ -19,7 +19,7 @@ const projectName = "llama2-with-kendra";
 const bucketName = `storage-for-${projectName}`;
 const endpoint = 'jumpstart-dft-meta-textgeneration-llama-2-7b-f';
 const kendra_region = 'us-west-2'; // process.env.CDK_DEFAULT_ACCOUNT;
-const enableConversationMode = 'ture';
+const enableConversationMode = 'true';
 const enableReference = 'false';
 const enableRAG = 'true';
 
