@@ -408,6 +408,8 @@ def lambda_handler(event, context):
     elapsed_time = int(time.time()) - start
     print("total run time(sec): ", elapsed_time)
 
+    print('msg: ', msg)
+    
     item = {
         'user-id': {'S':userId},
         'request-id': {'S':requestId},
