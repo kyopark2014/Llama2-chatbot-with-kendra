@@ -37,7 +37,7 @@ print('enableConversationMode: ', enableConversationMode)
 enableReference = os.environ.get('enableReference', 'false')
 enableRAG = os.environ.get('enableRAG', 'true')
 
-conversationMothod = 'ConversationalRetrievalChain' # ConversationalRetrievalChain or PromptTemplate
+conversationMothod = 'PromptTemplate' # ConversationalRetrievalChain or PromptTemplate
 isReady = False   
 
 class ContentHandler(LLMContentHandler):
