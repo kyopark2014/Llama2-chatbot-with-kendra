@@ -251,6 +251,8 @@ def get_answer_using_template_with_history(query, chat_memory):
         
         Human: {question}
 
+        If the answer is not in the context say "주어진 내용에서 관련 답변을 찾을 수 없습니다."
+
         Assistant:"""
     CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(condense_template)
             
@@ -260,7 +262,11 @@ def get_answer_using_template_with_history(query, chat_memory):
     print('chat_history_all: ', chat_history_all)
 
     # use last two chunks of chat history
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=2000,chunk_overlap=0)
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=2000,
+        chunk_overlap=0,
+        separators=["\n\n", "\n", ".", " ", ""],
+        length_function = len)
     texts = text_splitter.split_text(chat_history_all) 
 
     pages = len(texts)
