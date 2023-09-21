@@ -26,7 +26,6 @@ s3 = boto3.client('s3')
 s3_bucket = os.environ.get('s3_bucket') # bucket name
 s3_prefix = os.environ.get('s3_prefix')
 callLogTableName = os.environ.get('callLogTableName')
-configTableName = os.environ.get('configTableName')
 kendraIndex = os.environ.get('kendraIndex')
 roleArn = os.environ.get('roleArn')
 endpoint_name = os.environ.get('endpoint')
@@ -452,13 +451,39 @@ def get_answer_using_template(query):
             return result['result']+reference
         else:
             return result['result']
-        
+
+def load_chatHistory(userId, allowTime, chat_memory):
+    dynamodb_client = boto3.client('dynamodb')
+
+    response = dynamodb_client.query(
+        TableName=callLogTableName,
+        KeyConditionExpression='user_id = :userId AND request_time > :allowTime',
+        ExpressionAttributeValues={
+            ':userId': {'S': userId},
+            ':allowTime': {'S': allowTime}
+        }
+    )
+    print('query result: ', response['Items'])
+
+    for item in response['Items']:
+        text = item['body']['S']
+        msg = item['msg']['S']
+        type = item['type']['S']
+
+        if type == 'text':
+            print('text: ', text)
+            print('msg: ', msg)        
+
+            chat_memory.save_context({"input": text}, {"output": msg})             
+
 def lambda_handler(event, context):
     print(event)
-    userId  = event['user-id']
+    userId  = event['user_id']
     print('userId: ', userId)
-    requestId  = event['request-id']
+    requestId  = event['request_id']
     print('requestId: ', requestId)
+    requestTime  = event['request_time']
+    print('requestTime: ', requestTime)
     type  = event['type']
     print('type: ', type)
     body = event['body']
@@ -475,6 +500,9 @@ def lambda_handler(event, context):
         chat_memory = ConversationBufferMemory(human_prefix='Human', ai_prefix='Assistant')
         map[userId] = chat_memory
         print('chat_memory does not exist. create new one!')
+
+        allowTime = '2020-09-20 21:52:14'
+        load_chatHistory(userId, allowTime, chat_memory)
 
     start = int(time.time())    
 
@@ -564,8 +592,9 @@ def lambda_handler(event, context):
     print('msg: ', msg)
     
     item = {
-        'user-id': {'S':userId},
-        'request-id': {'S':requestId},
+        'user_id': {'S':userId},
+        'request_id': {'S':requestId},
+        'request_time': {'S':requestTime},
         'type': {'S':type},
         'body': {'S':body},
         'msg': {'S':msg}
