@@ -17,7 +17,7 @@ exports.handler = async (event, context) => {
         IndexName: indexName, 
         KeyConditionExpression: "request_id = :requestId",
         ExpressionAttributeValues: {
-            ":requestId": requestId
+            ":requestId": {'S': requestId}
         }
     };
     
