@@ -70,7 +70,7 @@ index = 0;
 
 addNotifyMessage("Start chat with Llama 2");
 
-addReceivedMessage("Wecome to Llama 2. Use the conversational chatbot and summarize documents, TXT, PDF, and CSV.")
+addReceivedMessage("Wecome to Llama 2. Use the conversational chatbot and summarize documents, TXT, PDF, and CSV.");
 
 // get history
 function getAllowTime() {    
